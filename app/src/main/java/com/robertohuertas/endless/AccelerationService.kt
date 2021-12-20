@@ -105,7 +105,7 @@ class AccelerationService : Service(), SensorEventListener
 
     private fun notificationCall(Message:String){
         Log.d("Acceleration Not", "NotificationCall")
-        val pattern = longArrayOf(500, 200, 500)
+        val pattern = longArrayOf(100, 200, 300, 400, 500, 400, 300, 200, 400)
         val intent = Intent(this, LauncherActivity::class.java)
         val pendingIntent = PendingIntent.getActivity(
             this,
