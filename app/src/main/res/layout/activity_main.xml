@@ -1,29 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
+
+<LinearLayout
+        android:orientation="vertical"
         xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".MainActivity">
 
-    <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-
-        <Button
-                android:id="@+id/btnStartService"
+        <TextView
+                android:id="@+id/timeTV"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Start Foreground Service" android:paddingTop="20dp" android:layout_marginTop="20dp"/>
+                android:text="00:00:00"
+                android:padding="10dp"
+                android:textColor="@color/black"
+                android:textSize="60sp"
+                android:textAlignment="center"/>
 
-        <Button
-                android:id="@+id/btnStopService"
+        <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Stop Foreground Service"/>
+                android:layout_height="match_parent"
+                tools:context=".MainActivity">
+
+            <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnStartService"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Start Workout"
+                    app:icon="@drawable/ic_baseline_play_arrow_24"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/btnStopService"
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:layout_marginTop="10dp"/>
+
+
+            <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnStopService"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Stop Workout"
+                    app:icon="@drawable/ic_baseline_replay_24"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/btnStartService"
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:layout_marginTop="10dp"/>
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
     </LinearLayout>
 
-</android.support.constraint.ConstraintLayout>

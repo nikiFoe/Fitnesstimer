@@ -1,6 +1,7 @@
 package com.robertohuertas.endless
 
 import android.app.*
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
@@ -9,18 +10,29 @@ import android.os.IBinder
 import android.os.PowerManager
 import android.os.SystemClock
 import android.provider.Settings
+import android.util.Log
 import android.widget.Toast
 import java.text.SimpleDateFormat
 import java.util.*
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.extensions.jsonBody
 import kotlinx.coroutines.*
+import android.content.IntentFilter
+import kotlin.math.round
+import kotlin.math.roundToInt
+import com.robertohuertas.endless.databinding.ActivityMainBinding
 
 
 class EndlessService : Service() {
 
+
+    //private lateinit var binding: ActivityMainBinding
     private var wakeLock: PowerManager.WakeLock? = null
     private var isServiceStarted = false
+    private lateinit var serviceIntentAcc: Intent
+    private var acceleration = 0.0
+    private var current_accel = 0.0
+    private var timerStart = false
 
     override fun onBind(intent: Intent): IBinder? {
         log("Some component want to bind with the service")
@@ -44,11 +56,14 @@ class EndlessService : Service() {
             )
         }
         // by returning this we make sure the service is restarted if the system kills the service
+        serviceIntentAcc = Intent(applicationContext, AccelerationService::class.java)
+        registerReceiver(updateAccel, IntentFilter(AccelerationService.ACC_Updated))
         return START_STICKY
     }
 
     override fun onCreate() {
         super.onCreate()
+
         log("The service has been created".toUpperCase())
         val notification = createNotification()
         startForeground(1, notification)
@@ -65,8 +80,8 @@ class EndlessService : Service() {
             it.setPackage(packageName)
         };
         val restartServicePendingIntent: PendingIntent = PendingIntent.getService(this, 1, restartServiceIntent, PendingIntent.FLAG_ONE_SHOT);
-        applicationContext.getSystemService(Context.ALARM_SERVICE);
-        val alarmService: AlarmManager = applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager;
+        applicationContext.getSystemService(ALARM_SERVICE);
+        val alarmService: AlarmManager = applicationContext.getSystemService(ALARM_SERVICE) as AlarmManager;
         alarmService.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 1000, restartServicePendingIntent);
     }
     
@@ -79,7 +94,7 @@ class EndlessService : Service() {
 
         // we need this lock so our service gets not affected by Doze Mode
         wakeLock =
-            (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
+            (getSystemService(POWER_SERVICE) as PowerManager).run {
                 newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "EndlessService::lock").apply {
                     acquire()
                 }
@@ -89,9 +104,12 @@ class EndlessService : Service() {
         GlobalScope.launch(Dispatchers.IO) {
             while (isServiceStarted) {
                 launch(Dispatchers.IO) {
-                    pingFakeServer()
+                    serviceIntentAcc.putExtra(AccelerationService.ACC_Updated, acceleration)
+                    serviceIntentAcc.putExtra(AccelerationService.INTERVAL, 25.0)
+                    startService(serviceIntentAcc)
+                    log("StartIntent")
                 }
-                delay(1 * 60 * 1000)
+                delay(1 * 20 * 1000)
             }
             log("End of the loop for the service")
         }
@@ -114,6 +132,45 @@ class EndlessService : Service() {
         isServiceStarted = false
         setServiceState(this, ServiceState.STOPPED)
     }
+
+    private val updateAccel: BroadcastReceiver = object : BroadcastReceiver()
+    {
+        override fun onReceive(context: Context, intent: Intent)
+        {
+            acceleration = serviceIntentAcc.getDoubleExtra(AccelerationService.ACC_EXTRA, 0.0)
+            timerStart = serviceIntentAcc.getBooleanExtra(AccelerationService.TIMER_START, false)
+            Log.d("timerStart", timerStart.toString())
+            log(acceleration.toString())
+            //timerRunning = intent.getBooleanExtra(AccelerationService.TIMER_RUNNING,true)
+            current_accel = round2Decimal(acceleration)
+            //binding.accel.text = current_accel.toString()
+            Log.d("TimmerRunning", serviceIntentAcc.getBooleanExtra(AccelerationService.TIMER_RUNNING, false).toString())
+
+        }
+    }
+
+    private fun round2Decimal(accel: Double): Double
+    {
+        val accel_rounded = round((accel*100)) /100
+        return accel_rounded
+    }
+
+    private fun getTimeStringFromDouble(time: Double): String
+    {
+        val resultInt = time.roundToInt()
+        val hours = resultInt % 86400 / 3600
+        val minutes = resultInt % 86400 % 3600 / 60
+        val seconds = resultInt % 86400 % 3600 % 60
+
+        return makeTimeString(hours, minutes, seconds)
+    }
+
+    private fun makeTimeString(hour: Int, min: Int, sec: Int): String = String.format(
+        "%02d:%02d:%02d",
+        hour,
+        min,
+        sec
+    )
 
     private fun pingFakeServer() {
         val df = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.mmmZ")
@@ -150,7 +207,7 @@ class EndlessService : Service() {
         // depending on the Android API that we're dealing with we will have
         // to use a specific method to create the notification
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
             val channel = NotificationChannel(
                 notificationChannelId,
                 "Endless Service notifications channel",

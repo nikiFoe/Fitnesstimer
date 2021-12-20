@@ -19,14 +19,14 @@
                 android:enabled="true"
                 android:exported="false">
         </service>
-
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-
+        <service android:name=".TimerService" />
+        <service android:name=".AccelerationService" />
         <receiver android:enabled="true" android:name=".StartReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
