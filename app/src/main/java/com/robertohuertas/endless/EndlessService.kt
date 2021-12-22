@@ -124,6 +124,7 @@ class EndlessService : Service() {
                     it.release()
                 }
             }
+            stopService(serviceIntentAcc)
             stopForeground(true)
             stopSelf()
         } catch (e: Exception) {

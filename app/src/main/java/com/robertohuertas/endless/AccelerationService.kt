@@ -17,6 +17,7 @@ import android.os.IBinder
 import android.os.SystemClock.elapsedRealtimeNanos
 import android.util.Log
 import java.util.*
+import kotlin.math.abs
 
 class AccelerationService : Service(), SensorEventListener
 {
@@ -40,8 +41,12 @@ class AccelerationService : Service(), SensorEventListener
     private var time = 0.0
     private var outerTime = 0.0
     private var wantedTime = 25.0
-
-
+    private var gyroArray = arrayOf(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+    private var accelArray = arrayOf(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+    private var maxAccel : Double? = 0.0
+    private var maxGyro: Double? = 0.0
+    private var gyroExc: Boolean = false
+    private var accelExc: Boolean = false
     //Keys
     private val TAG = "AccelerationService"
 
@@ -70,6 +75,14 @@ class AccelerationService : Service(), SensorEventListener
             )
         }
 
+        mSensorManager!!.getDefaultSensor(Sensor.TYPE_GYROSCOPE)?.also { gyroscope ->
+            mSensorManager!!.registerListener(
+                this,
+                gyroscope,
+                SensorManager.SENSOR_DELAY_NORMAL,
+                SensorManager.SENSOR_DELAY_NORMAL
+            )
+        }
         //Notification setup
         notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         Log.d("RUNRUNRUN", "RUNNNNN")
@@ -83,21 +96,51 @@ class AccelerationService : Service(), SensorEventListener
         super.onDestroy()
     }
 
+    fun append(arr: Array<Double>, element: Double): Array<Double> {
+        val list: MutableList<Double> = arr.toMutableList()
+        list.add(element)
+        list.removeAt(0)
+        return list.toTypedArray()
+    }
+
     override fun onSensorChanged(event: SensorEvent?) {
+        if (event?.sensor?.type == Sensor.TYPE_GYROSCOPE) {
+            Log.d("Gyros", event.values[1].toString())
+            gyroArray = append(gyroArray, abs(event.values[1].toDouble()))
+            Log.d("GyroArray", gyroArray.max().toString())
+        }
         if (event?.sensor?.type == Sensor.TYPE_ACCELEROMETER) {
+
+            accelArray = append(accelArray, abs(event.values[2].toDouble()))
             Log.d("InnerSensorChange", event.values[2].toString())
-            if (event.values[2].toDouble() > 14 && !innerIntent.getBooleanExtra(TIMER_RUNNING, false)) {
-                Log.d("InnerSensorChange", "TimerStartSet" + event.values[2].toString())
+        }
+        maxAccel = accelArray.max()
+        maxGyro = gyroArray.max()
+        gyroExc = higherThan(gyroArray, 4.0)
+        accelExc = higherThan(accelArray, 19.0)
+        if ((event?.sensor?.type == Sensor.TYPE_GYROSCOPE).or(event?.sensor?.type == Sensor.TYPE_ACCELEROMETER))
+            if (gyroExc && accelExc && !innerIntent.getBooleanExtra(TIMER_RUNNING, false)){
+                //if (event.values[2].toDouble() > 25 && !innerIntent.getBooleanExtra(TIMER_RUNNING, false)) {
+                //Log.d("InnerSensorChange", "TimerStartSet" + !event.values[2].toString())
                 notificationCall("Timer starts now.")
                 startTimer()
                 innerIntent.putExtra(TIMER_RUNNING, true)
-                innerIntent.putExtra(ACC_EXTRA, event.values[2].toDouble())
+                //innerIntent.putExtra(ACC_EXTRA, event.values[2].toDouble())
                 sendBroadcast(innerIntent)
             }
-        }
+
     }
 
-
+    private fun higherThan(arr : Array<Double>, limit : Double): Boolean {
+        var exceed = false
+        for (i in arr){
+            if (i > limit){
+                exceed = true
+                break
+            }
+        }
+        return exceed
+    }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
     }
