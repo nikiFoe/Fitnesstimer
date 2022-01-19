@@ -203,9 +203,9 @@ class AccelerationService : Service(), SensorEventListener
             var t = intent.getDoubleExtra(TimerService.TIME_EXTRA, 0.0)
             broadcastTimeIntent.putExtra(BROADCASTTIME, t)
             sendBroadcast(broadcastTimeIntent)
-            if(intent.getDoubleExtra(TimerService.TIME_EXTRA, 0.0)>=wantedTime)
+            if(t>=wantedTime)
             {
-                notificationCall("Timer runs for " + intent.getDoubleExtra(TimerService.TIME_EXTRA, 0.0).toString() + "s.")
+                notificationCall("Timer runs for " + (t).toString() + "s.")
                 resetTimer()
                 outerTimerIntent.putExtra(TIMER_RUNNING, false)
                 Log.d("TimeReceiver", "TimerRunOut")
@@ -234,10 +234,10 @@ class AccelerationService : Service(), SensorEventListener
     {
         stopTimer()
         //startMeasurment()
-        outerTime = 0.0
-        var broadcastTimeIntent = Intent(BROADCASTTIME)
-        broadcastTimeIntent.putExtra(BROADCASTTIME, outerTime)
-        sendBroadcast(broadcastTimeIntent)
+        //outerTime = 0.0
+        //var broadcastTimeIntent = Intent(BROADCASTTIME)
+        //broadcastTimeIntent.putExtra(BROADCASTTIME, outerTime)
+        //sendBroadcast(broadcastTimeIntent)
     }
 
 
