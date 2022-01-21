@@ -16,6 +16,7 @@ import android.os.Build
 import android.os.IBinder
 import android.os.SystemClock.elapsedRealtimeNanos
 import android.util.Log
+import android.widget.Button
 import java.util.*
 import kotlin.math.abs
 
@@ -47,8 +48,14 @@ class AccelerationService : Service(), SensorEventListener
     private var maxGyro: Double? = 0.0
     private var gyroExc: Boolean = false
     private var accelExc: Boolean = false
+    private var timeMap = mutableMapOf<Int, Button>()
+    private var numbersMapHash = hashMapOf<Int, Int>()
+    private var useHashmape = hashMapOf<Int, Int>()
+    private var usedHashmape = hashMapOf<Int, Int>()
+    private var nextTime = 0
     //Keys
     private val TAG = "AccelerationService"
+
 
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int
@@ -62,6 +69,16 @@ class AccelerationService : Service(), SensorEventListener
 
         wantedTime = intent.getDoubleExtra(INTERVAL, wantedTime).toDouble()
 
+
+        val hashMap = intent!!.getSerializableExtra(EndlessService.VALUEMAP) as HashMap<Int, Int>
+        numbersMapHash = hashMap
+        numbersMapHash.keys.forEach{
+            Log.d("NumberMapAcc", ("Key: " + it.toString() + " " + "Value: " + numbersMapHash[it].toString()))
+        }
+
+        useHashmape = numbersMapHash
+
+        nextTime = nextTimeElement()
         //Sensor setup
         mSensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
 
@@ -203,16 +220,35 @@ class AccelerationService : Service(), SensorEventListener
             var t = intent.getDoubleExtra(TimerService.TIME_EXTRA, 0.0)
             broadcastTimeIntent.putExtra(BROADCASTTIME, t)
             sendBroadcast(broadcastTimeIntent)
-            if(t>=wantedTime)
+            if(t>=nextTime)
             {
                 notificationCall("Timer runs for " + (t).toString() + "s.")
                 resetTimer()
                 outerTimerIntent.putExtra(TIMER_RUNNING, false)
                 Log.d("TimeReceiver", "TimerRunOut")
+                nextTime = nextTimeElement()
             }
         }
     }
 
+    private fun nextTimeElement(): Int {
+        var counter = -1
+        var found = true
+
+        if (!useHashmape.isEmpty()){
+            useHashmape = numbersMapHash
+        }
+
+        while(found){
+            counter = counter + 1
+            found = !useHashmape.containsKey(counter)
+        }
+        Log.d("CounterLog", useHashmape.keys.toString())
+        var value:Int
+        value = useHashmape.get(counter)!!
+        useHashmape.remove(counter)
+        return value
+    }
     private fun startTimer()
     {
         outerTimerIntent.putExtra(TimerService.TIMER_UPDATED, 0.0)
@@ -245,6 +281,7 @@ class AccelerationService : Service(), SensorEventListener
     companion object
     {
         const val ACC_Updated = "accUpdated"
+        const val VALUEMAP = "valueMap"
         const val ACC_EXTRA = "accExtra"
         const val TIMER_START = "timerStart"
         const val TIMER_RUNNING = "timerisRunning"

@@ -23,7 +23,7 @@ import com.robertohuertas.endless.databinding.ActivityMainBinding
 import kotlin.math.roundToInt
 import android.app.AlertDialog
 import android.content.DialogInterface
-
+import java.io.Serializable
 
 
 class MainActivity : AppCompatActivity() {
@@ -31,6 +31,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var serviceIntentTimer: Intent
     private var numbersMap = mutableMapOf<Int, Button>()
+    private var buttonMapHash = hashMapOf<Int, Button>()
+    private var numbersMapHash = hashMapOf<Int, Int>()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,13 +59,18 @@ class MainActivity : AppCompatActivity() {
                 actionOnService(Actions.STOP)
             }
         }
-        //val button = findViewById<Button>(R.id.button)
-        //val button3 = findViewById<Button>(R.id.button3)
-        //val button4 = findViewById<Button>(R.id.button4)
-        //val button5 = findViewById<Button>(R.id.button5)
 
-        //var numbersMap = mutableMapOf<Int, Button>()
-        //val listButtons = listOf<Button>(button, button3, button4, button5)
+        findViewById<Button>(R.id.showDynamicButtons).let {
+            it.setOnClickListener{
+                numbersMap.keys.forEach{
+                    Log.d("NumberMap", ("Key: " + it.toString() + " " + "Value: " + numbersMap[it]?.getText().toString()))
+                }
+
+                buttonMapHash.keys.forEach{
+                    Log.d("NumberMap", ("Key: " + it.toString() + " " + "Value: " + buttonMapHash[it]?.getText().toString()))
+                }
+            }
+        }
         val numberInput = findViewById<EditText>(R.id.editTextNumber)
         var counter = 0
         var button:Button
@@ -80,6 +87,7 @@ class MainActivity : AppCompatActivity() {
                 //numbersMap[1]?.setText(valueString)
                 button = createButtonDynamically(counter.toString(), valueString)
                 numbersMap[counter] = button
+                buttonMapHash.put(counter, button)
                 //numbersMap[1]?.setBackgroundColor(getResources().getColor(R.color.grey))
                 numberInput.text.delete(0, valueLengt)
                 counter = counter + 1
@@ -125,6 +133,8 @@ class MainActivity : AppCompatActivity() {
                 val animationBounce = AnimationUtils.loadAnimation(this, R.anim.bounce_press)
                 it.startAnimation(animationBounce)
                 layout.removeView(it)
+                numbersMap.remove(ID.toInt())
+                buttonMapHash.remove(ID.toInt())
                 Log.d("LongClick", "Pressed")
             }
             it.setOnLongClickListener{
@@ -196,13 +206,21 @@ class MainActivity : AppCompatActivity() {
         if (getServiceState(this) == ServiceState.STOPPED && action == Actions.STOP) return
         Intent(this, EndlessService::class.java).also {
             it.action = action.name
+            convertButtonToNumber()
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 log("Starting the service in >=26 Mode")
+                it.putExtra(EndlessService.VALUEMAP, numbersMapHash)
                 startForegroundService(it)
                 return
             }
             log("Starting the service in < 26 Mode")
             startService(it)
+        }
+    }
+
+    private fun convertButtonToNumber(){
+        buttonMapHash.keys.forEach{
+            numbersMapHash.put(it, buttonMapHash[it]?.getText().toString().toInt())
         }
     }
 
