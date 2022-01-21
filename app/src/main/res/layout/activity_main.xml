@@ -19,36 +19,76 @@
                 android:textSize="60sp"
                 android:textAlignment="center"/>
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:context=".MainActivity">
+
+
+        <LinearLayout
+                android:id="@+id/linearLayout"
+                android:orientation="vertical"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                tools:context=".MainActivity">
+                android:layout_height="match_parent">
 
-            <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnStartService"
-                    android:layout_width="wrap_content"
+
+            <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Start Workout"
-                    app:icon="@drawable/ic_baseline_play_arrow_24"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toStartOf="@id/btnStopService"
-                    app:layout_constraintTop_toTopOf="parent"
-                    android:layout_marginTop="10dp"/>
+                    android:gravity="center_horizontal"
+                    android:orientation="horizontal">
+
+                <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnStartService"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Start Workout"
+                        app:icon="@drawable/ic_baseline_play_arrow_24"
+                        android:layout_marginRight="10dp"
+                        android:layout_marginTop="10dp" />
+
+                <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnStopService"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Stop Workout"
+                        app:icon="@drawable/ic_baseline_replay_24"
+                        android:layout_marginTop="10dp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                    android:orientation="horizontal"
+                    android:gravity="center_horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                <EditText
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:ems="10"
+                        android:id="@+id/editTextNumber"
+                        android:layout_marginTop="20dp"
+                        android:gravity="center"
+                        android:hint="Set Seconds" />
+            </LinearLayout>
+
+            <GridLayout
+                    android:id="@+id/grid"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="10sp"
+                    android:useDefaultMargins="true"
+                    android:rowCount="10"
+                    android:columnCount="4"/>
+
+        </LinearLayout>
 
 
-            <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnStopService"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Stop Workout"
-                    app:icon="@drawable/ic_baseline_replay_24"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@+id/btnStartService"
-                    app:layout_constraintTop_toTopOf="parent"
-                    android:layout_marginTop="10dp"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-    </LinearLayout>
+</LinearLayout>
 
