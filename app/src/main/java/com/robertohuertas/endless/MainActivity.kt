@@ -60,7 +60,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        findViewById<Button>(R.id.showDynamicButtons).let {
+        /*findViewById<Button>(R.id.showDynamicButtons).let {
             it.setOnClickListener{
                 numbersMap.keys.forEach{
                     Log.d("NumberMap", ("Key: " + it.toString() + " " + "Value: " + numbersMap[it]?.getText().toString()))
@@ -70,7 +70,7 @@ class MainActivity : AppCompatActivity() {
                     Log.d("NumberMap", ("Key: " + it.toString() + " " + "Value: " + buttonMapHash[it]?.getText().toString()))
                 }
             }
-        }
+        }*/
         val numberInput = findViewById<EditText>(R.id.editTextNumber)
         var counter = 0
         var button:Button

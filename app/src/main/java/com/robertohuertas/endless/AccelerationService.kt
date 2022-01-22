@@ -1,5 +1,6 @@
 package com.robertohuertas.endless
 
+import android.annotation.SuppressLint
 import android.app.*
 import android.app.Service.START_NOT_STICKY
 import android.content.BroadcastReceiver
@@ -15,9 +16,13 @@ import android.hardware.SensorManager
 import android.os.Build
 import android.os.IBinder
 import android.os.SystemClock.elapsedRealtimeNanos
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.util.Log
 import android.widget.Button
+import android.widget.Toast
 import java.util.*
+import kotlin.collections.HashMap
 import kotlin.math.abs
 
 class AccelerationService : Service(), SensorEventListener
@@ -76,7 +81,7 @@ class AccelerationService : Service(), SensorEventListener
             Log.d("NumberMapAcc", ("Key: " + it.toString() + " " + "Value: " + numbersMapHash[it].toString()))
         }
 
-        useHashmape = numbersMapHash
+        useHashmape = HashMap(numbersMapHash)
 
         nextTime = nextTimeElement()
         //Sensor setup
@@ -222,21 +227,37 @@ class AccelerationService : Service(), SensorEventListener
             sendBroadcast(broadcastTimeIntent)
             if(t>=nextTime)
             {
-                notificationCall("Timer runs for " + (t).toString() + "s.")
+                //notificationCall("Timer runs for " + (t).toString() + "s.")
                 resetTimer()
                 outerTimerIntent.putExtra(TIMER_RUNNING, false)
                 Log.d("TimeReceiver", "TimerRunOut")
                 nextTime = nextTimeElement()
+                Toast.makeText(applicationContext, "Stop after " + t.toString() + "s", Toast.LENGTH_SHORT).show()
+                vibrateToast()
             }
         }
     }
 
+    @SuppressLint("ServiceCast")
+    fun vibrateToast (){
+        val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        if (vibrator.hasVibrator()) { // Vibrator availability checking
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                vibrator.vibrate(VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE)) // New vibrate method for API Level 26 or higher
+            } else {
+                vibrator.vibrate(500) // Vibrate method for below API Level 26
+            }
+        }
+    }
     private fun nextTimeElement(): Int {
         var counter = -1
         var found = true
 
-        if (!useHashmape.isEmpty()){
-            useHashmape = numbersMapHash
+        if (useHashmape.isEmpty()){
+            useHashmape = HashMap(numbersMapHash)
+
+            Log.d("NextElement_1", numbersMapHash.keys.toString())
+            Log.d("NextElement_2", useHashmape.keys.toString())
         }
 
         while(found){

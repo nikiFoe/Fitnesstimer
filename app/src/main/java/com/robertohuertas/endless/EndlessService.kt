@@ -129,7 +129,7 @@ class EndlessService : Service() {
                     startService(serviceIntentAcc)
                     log("StartIntent")
                 }
-                delay(1 * 200 * 1000)
+                delay(1 * 20000 * 1000)
             }
             log("End of the loop for the service")
         }
