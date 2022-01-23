@@ -8,4 +8,5 @@
     <color android:name="black">#FF000000</color>
     <color android:name="white">#FFFFFFFF</color>
     <color android:name="grey">#808080</color>
+    <color android:name="dark_green">#65C368</color>
 </selector>

@@ -13,16 +13,17 @@ import android.util.Log
 import android.util.TypedValue
 import android.view.animation.AlphaAnimation
 import android.view.animation.AnimationUtils
-import android.widget.Button
-import android.widget.EditText
-import android.widget.LinearLayout
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.gridlayout.widget.GridLayout
 import com.robertohuertas.endless.databinding.ActivityMainBinding
 import kotlin.math.roundToInt
 import android.app.AlertDialog
 import android.content.DialogInterface
+import android.os.Handler
+import android.text.InputType
+import android.widget.*
+import androidx.core.content.ContextCompat
+import kotlinx.android.synthetic.main.activity_main.*
 import java.io.Serializable
 
 
@@ -30,6 +31,14 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var serviceIntentTimer: Intent
+    private lateinit var serviceIntentEndTime: Intent
+    private var progressBar: ProgressBar? = null
+    private var currentTime:Double = 0.0
+    private var timeStop:Int = 0
+    private var currentKey:Int = 0
+    private var lastKey:Boolean = false
+    internal var status = 0
+    private val handler = Handler()
     private var numbersMap = mutableMapOf<Int, Button>()
     private var buttonMapHash = hashMapOf<Int, Button>()
     private var numbersMapHash = hashMapOf<Int, Int>()
@@ -43,8 +52,9 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         serviceIntentTimer = Intent(applicationContext, AccelerationService::class.java)
         registerReceiver(receivingTime, IntentFilter(AccelerationService.BROADCASTTIME))
+        serviceIntentEndTime = Intent(applicationContext, AccelerationService::class.java)
 
-        title = "Endless Service"
+        title = "Sensor Timer"
 
         findViewById<Button>(R.id.btnStartService).let {
             it.setOnClickListener {
@@ -71,6 +81,8 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }*/
+
+
         val numberInput = findViewById<EditText>(R.id.editTextNumber)
         var counter = 0
         var button:Button
@@ -180,7 +192,9 @@ class MainActivity : AppCompatActivity() {
         builder.setTitle("Change Interval")
 
         // Set up the input
+
         val input = EditText(this)
+        input.inputType = InputType.TYPE_CLASS_NUMBER
         // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
         input.setHint("Set Seconds")
         //input.inputType = InputType.TYPE_CLASS_TEXT
@@ -228,15 +242,54 @@ class MainActivity : AppCompatActivity() {
     {
         override fun onReceive(context: Context, intent: Intent)
         {
-            binding.timeTV.text = getTimeStringFromDouble(
-                intent.getDoubleExtra(
-                    AccelerationService.BROADCASTTIME,
-                    0.0
-                )
+            val resources = resources
+            val drawable = resources.getDrawable(R.drawable.circular_progress_bar)
+            val progressBar: ProgressBar = findViewById(R.id.progressBar)
+            currentTime =intent.getDoubleExtra(
+                AccelerationService.BROADCASTTIME,
+                0.0
             )
+            timeStop = intent.getIntExtra(
+                AccelerationService.STOPTIME,
+                0
+            )
+
+            currentKey = intent.getIntExtra(AccelerationService.BUTTONKEY, 0)
+            lastKey = intent.getBooleanExtra(AccelerationService.LASTKEY, false)
+
+            if (lastKey == true){
+                Log.d("ColorChange_2", "Color should be different")
+                buttonMapHash.keys.forEach{
+                    buttonMapHash.get(it)?.background = roundedCornersDrawable(
+                        2.dpToPixels(applicationContext), // border width in pixels
+                        Color.GRAY, // border color
+                        10.dpToPixels(applicationContext).toFloat(), // corners radius
+                        Color.GRAY
+                    )
+                }
+            }
+
+            Log.d("TimeStop", lastKey.toString())
+            progressBar.progress = 0
+            progressBar.secondaryProgress = timeStop.toInt()
+            progressBar.max = timeStop.toInt()
+            progressBar.progressDrawable = drawable
+
+            binding.timeTV.text = getTimeStringFromDouble(currentTime)
+            progressBar.progress = currentTime.toInt()
+            if (currentTime.toInt() == timeStop){
+                buttonMapHash.get(currentKey)?.background = roundedCornersDrawable(
+                    2.dpToPixels(applicationContext), // border width in pixels
+                    ContextCompat.getColor(context, R.color.colorPrimaryDark), // border color
+                    10.dpToPixels(applicationContext).toFloat(), // corners radius
+                    ContextCompat.getColor(context, R.color.colorPrimaryDark)
+                )
+                Log.d("ColorChange", "Color should be different")
+
+            }
             Log.d(
-                "BraodcastTime",
-                intent.getDoubleExtra(AccelerationService.BROADCASTTIME, 0.0).toString()
+                "CurrentTime",
+                currentTime.toString()
             )
         }
     }

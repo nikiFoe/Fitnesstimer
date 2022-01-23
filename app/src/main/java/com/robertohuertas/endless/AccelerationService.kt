@@ -58,6 +58,8 @@ class AccelerationService : Service(), SensorEventListener
     private var useHashmape = hashMapOf<Int, Int>()
     private var usedHashmape = hashMapOf<Int, Int>()
     private var nextTime = 0
+    private var nextKey = 0
+    private var lastKey = false
     //Keys
     private val TAG = "AccelerationService"
 
@@ -82,8 +84,9 @@ class AccelerationService : Service(), SensorEventListener
         }
 
         useHashmape = HashMap(numbersMapHash)
-
-        nextTime = nextTimeElement()
+        var temp = nextTimeElement()
+        nextTime = temp.first
+        nextKey =  temp.second
         //Sensor setup
         mSensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
 
@@ -144,7 +147,10 @@ class AccelerationService : Service(), SensorEventListener
             if (gyroExc && accelExc && !innerIntent.getBooleanExtra(TIMER_RUNNING, false)){
                 //if (event.values[2].toDouble() > 25 && !innerIntent.getBooleanExtra(TIMER_RUNNING, false)) {
                 //Log.d("InnerSensorChange", "TimerStartSet" + !event.values[2].toString())
-                notificationCall("Timer starts now.")
+                //notificationCall("Timer starts now.")
+                Toast.makeText(applicationContext, "Timer Starts.", Toast.LENGTH_SHORT).show()
+                val pattern = longArrayOf(0, 100, 100, 400)
+                vibrateToast(pattern)
                 startTimer()
                 innerIntent.putExtra(TIMER_RUNNING, true)
                 //innerIntent.putExtra(ACC_EXTRA, event.values[2].toDouble())
@@ -224,38 +230,48 @@ class AccelerationService : Service(), SensorEventListener
             var broadcastTimeIntent = Intent(BROADCASTTIME)
             var t = intent.getDoubleExtra(TimerService.TIME_EXTRA, 0.0)
             broadcastTimeIntent.putExtra(BROADCASTTIME, t)
+            broadcastTimeIntent.putExtra(STOPTIME, nextTime)
+            broadcastTimeIntent.putExtra(BUTTONKEY, nextKey)
+            broadcastTimeIntent.putExtra(LASTKEY, lastKey)
             sendBroadcast(broadcastTimeIntent)
+            lastKey = false
             if(t>=nextTime)
             {
                 //notificationCall("Timer runs for " + (t).toString() + "s.")
                 resetTimer()
                 outerTimerIntent.putExtra(TIMER_RUNNING, false)
-                Log.d("TimeReceiver", "TimerRunOut")
-                nextTime = nextTimeElement()
+                var temp = nextTimeElement()
+                nextTime = temp.first
+                nextKey = temp.second
+                lastKey = temp.third
+                Log.d("LastKey", lastKey.toString())
                 Toast.makeText(applicationContext, "Stop after " + t.toString() + "s", Toast.LENGTH_SHORT).show()
-                vibrateToast()
+                val pattern = longArrayOf(0, 400, 100, 100)
+                vibrateToast(pattern)
             }
         }
     }
 
     @SuppressLint("ServiceCast")
-    fun vibrateToast (){
+    fun vibrateToast (pattern:LongArray){
         val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
         if (vibrator.hasVibrator()) { // Vibrator availability checking
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                vibrator.vibrate(VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE)) // New vibrate method for API Level 26 or higher
+                vibrator.vibrate(VibrationEffect.createWaveform(pattern, VibrationEffect.DEFAULT_AMPLITUDE)) // New vibrate method for API Level 26 or higher
+
             } else {
                 vibrator.vibrate(500) // Vibrate method for below API Level 26
             }
         }
     }
-    private fun nextTimeElement(): Int {
+    private fun nextTimeElement(): Triple<Int, Int, Boolean> {
         var counter = -1
         var found = true
+        var last = false
 
         if (useHashmape.isEmpty()){
             useHashmape = HashMap(numbersMapHash)
-
+            last = true
             Log.d("NextElement_1", numbersMapHash.keys.toString())
             Log.d("NextElement_2", useHashmape.keys.toString())
         }
@@ -268,7 +284,7 @@ class AccelerationService : Service(), SensorEventListener
         var value:Int
         value = useHashmape.get(counter)!!
         useHashmape.remove(counter)
-        return value
+        return Triple(value, counter, last)
     }
     private fun startTimer()
     {
@@ -309,6 +325,9 @@ class AccelerationService : Service(), SensorEventListener
         const val MEASUREWAIT = "measureWait"
         const val INNER_TIMER_RUNNING = "innerTimerRunning"
         const val BROADCASTTIME = "braodcastTime"
+        const val STOPTIME = "stopTime"
+        const val BUTTONKEY = "buttonKey"
+        const val LASTKEY = "lastKey"
         const val INTERVAL = "timeInterval"
         const val TIMER_UPDATED_Acc = "timerUpdatedAcc"
         const val TIME_EXTRA_Acc = "timeExtraAcc"

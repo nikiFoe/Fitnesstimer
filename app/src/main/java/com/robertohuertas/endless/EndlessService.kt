@@ -246,7 +246,7 @@ class EndlessService : Service() {
                 it.enableLights(true)
                 it.lightColor = Color.RED
                 it.enableVibration(true)
-                it.vibrationPattern = longArrayOf(100, 200, 300, 400, 500, 400, 300, 200, 400)
+                it.vibrationPattern = longArrayOf(100, 200, 300, 400)//longArrayOf(100, 200, 300, 400, 500, 400, 300, 200, 400)
                 it
             }
             notificationManager.createNotificationChannel(channel)
@@ -262,11 +262,11 @@ class EndlessService : Service() {
         ) else Notification.Builder(this)
 
         return builder
-            .setContentTitle("Endless Service")
-            .setContentText("This is your favorite endless service working")
+            .setContentTitle("Sensor Timer")
+            .setContentText("Timer Measurment Started")
             .setContentIntent(pendingIntent)
             .setSmallIcon(R.mipmap.ic_launcher)
-            .setTicker("Ticker text")
+            .setTicker("Start")
             .setPriority(Notification.PRIORITY_HIGH) // for under android 26 compatibility
             .build()
     }
@@ -275,8 +275,6 @@ class EndlessService : Service() {
     }
 }
 
-private fun Intent.putExtra(valuemap: String, timeMap: MutableMap<Int, Button>) {
 
-}
 
 
