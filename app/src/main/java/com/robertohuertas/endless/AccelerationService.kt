@@ -42,6 +42,8 @@ class AccelerationService : Service(), SensorEventListener
     //Services and Intents
     private var innerIntent = Intent(ACC_Updated)
     private lateinit var outerTimerIntent: Intent
+    private var timerRunning = Intent(TIMER_RUNNING)
+    //private lateinit var timerRunning: Intent = Intent(TIMER_RUNNING)
 
     //Value variables
     private var time = 0.0
@@ -60,6 +62,7 @@ class AccelerationService : Service(), SensorEventListener
     private var nextTime = 0
     private var nextKey = 0
     private var lastKey = false
+
     //Keys
     private val TAG = "AccelerationService"
 
@@ -73,6 +76,10 @@ class AccelerationService : Service(), SensorEventListener
         //Outer timer service setup
         outerTimerIntent = Intent(applicationContext, TimerService::class.java)
         registerReceiver(updateTime, IntentFilter(TimerService.TIMER_UPDATED))
+
+
+
+
 
         wantedTime = intent.getDoubleExtra(INTERVAL, wantedTime).toDouble()
 
@@ -148,6 +155,9 @@ class AccelerationService : Service(), SensorEventListener
                 //if (event.values[2].toDouble() > 25 && !innerIntent.getBooleanExtra(TIMER_RUNNING, false)) {
                 //Log.d("InnerSensorChange", "TimerStartSet" + !event.values[2].toString())
                 //notificationCall("Timer starts now.")
+                timerRunning.putExtra(TIMER_RUNNING, true)
+                timerRunning.putExtra(STOPTIME, nextTime)
+                sendBroadcast(timerRunning)
                 Toast.makeText(applicationContext, "Timer Starts.", Toast.LENGTH_SHORT).show()
                 val pattern = longArrayOf(0, 100, 100, 400)
                 vibrateToast(pattern)
@@ -155,6 +165,7 @@ class AccelerationService : Service(), SensorEventListener
                 innerIntent.putExtra(TIMER_RUNNING, true)
                 //innerIntent.putExtra(ACC_EXTRA, event.values[2].toDouble())
                 sendBroadcast(innerIntent)
+
             }
 
     }
@@ -240,6 +251,8 @@ class AccelerationService : Service(), SensorEventListener
                 //notificationCall("Timer runs for " + (t).toString() + "s.")
                 resetTimer()
                 outerTimerIntent.putExtra(TIMER_RUNNING, false)
+                timerRunning.putExtra(TIMER_RUNNING, false)
+                sendBroadcast(timerRunning)
                 var temp = nextTimeElement()
                 nextTime = temp.first
                 nextKey = temp.second
@@ -299,6 +312,8 @@ class AccelerationService : Service(), SensorEventListener
     {
         stopService(outerTimerIntent)
         innerIntent.putExtra(TIMER_RUNNING, false)
+        timerRunning.putExtra(TIMER_RUNNING, false)
+        sendBroadcast(timerRunning)
         //timerRunning = false
         //serviceIntentAcc.putExtra(AccelerationService.TIMER_RUNNING, timerRunning)
     }

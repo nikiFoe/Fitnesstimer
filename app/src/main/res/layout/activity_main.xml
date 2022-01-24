@@ -9,110 +9,123 @@
         android:layout_height="match_parent"
         tools:context=".MainActivity">
 
-    <FrameLayout
+    <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="350dp">
-
-        <TextView
-                android:id="@+id/timeTV"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:text="00:00:00"
-                android:padding="10dp"
-                android:textColor="@color/black"
-                android:textSize="40sp"
-                android:gravity="center" />
-
-        <ProgressBar
-                android:id="@+id/progressBar"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_gravity="center_horizontal"
-                android:indeterminate="false"
-                android:progressDrawable="@drawable/circular_progress_bar"
-                android:background="@drawable/circle_shape"
-                style="?android:attr/progressBarStyleHorizontal"
-                android:max="100"
-                android:progress="0" />
-    </FrameLayout>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/layout"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            tools:context=".MainActivity">
-
+            android:layout_height="match_parent">
 
         <LinearLayout
-                android:id="@+id/linearLayout"
-                android:orientation="vertical"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="wrap_content"
+                android:orientation="vertical" >
 
-
-            <LinearLayout
+            <FrameLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_horizontal"
-                    android:orientation="horizontal">
+                    android:layout_height="350dp">
 
-                <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnStartService"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Start Workout"
-                        app:icon="@drawable/ic_baseline_play_arrow_24"
-                        android:layout_marginRight="10dp"
-                        android:layout_marginTop="10dp" />
-
-                <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnStopService"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Stop Workout"
-                        app:icon="@drawable/ic_baseline_replay_24"
-                        android:layout_marginTop="10dp" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                    android:orientation="horizontal"
-                    android:gravity="center_horizontal"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-
-                <EditText
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:inputType="number"
-                        android:ems="10"
-                        android:id="@+id/editTextNumber"
-                        android:layout_marginTop="20dp"
-                        android:gravity="center"
-                        android:hint="Set Seconds" />
-
-            </LinearLayout>
-
-            <ScrollView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent">
-
-
-                <GridLayout
-                        android:id="@+id/grid"
+                <TextView
+                        android:id="@+id/timeTV"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="10sp"
-                        android:useDefaultMargins="true"
-                        android:rowCount="10"
-                        android:columnCount="4"
-                        android:paddingBottom="10dp"/>
-            </ScrollView>
+                        android:layout_height="match_parent"
+                        android:text="00:00:00"
+                        android:padding="10dp"
+                        android:textColor="@color/black"
+                        android:textSize="40sp"
+                        android:gravity="center" />
+
+                <ProgressBar
+                        android:id="@+id/progressBar"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center_horizontal"
+                        android:indeterminate="false"
+                        android:progressDrawable="@drawable/circular_progress_bar"
+                        android:background="@drawable/circle_shape"
+                        style="?android:attr/progressBarStyleHorizontal"
+                        android:max="100"
+                        android:padding="1sp"
+                        android:progress="0" />
+            </FrameLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    tools:context=".MainActivity">
+
+
+                <LinearLayout
+                        android:id="@+id/linearLayout"
+                        android:orientation="vertical"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+
+                    <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_horizontal"
+                            android:orientation="horizontal">
+
+                        <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnStartService"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Start Workout"
+                                app:icon="@drawable/ic_baseline_play_arrow_24"
+                                android:layout_marginRight="10dp"
+                                android:layout_marginTop="10dp" />
+
+                        <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnStopService"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Stop Workout"
+                                app:icon="@drawable/ic_baseline_replay_24"
+                                android:layout_marginTop="10dp" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                            android:orientation="horizontal"
+                            android:gravity="center_horizontal"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                        <EditText
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:inputType="number"
+                                android:ems="10"
+                                android:id="@+id/editTextNumber"
+                                android:layout_marginTop="20dp"
+                                android:gravity="center"
+                                android:hint="Set Seconds" />
+
+                    </LinearLayout>
+
+                    <ScrollView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent">
+
+
+                        <GridLayout
+                                android:id="@+id/grid"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_margin="10sp"
+                                android:useDefaultMargins="true"
+                                android:rowCount="10"
+                                android:columnCount="4"
+                                android:paddingBottom="10dp" />
+                    </ScrollView>
+
+                </LinearLayout>
+
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
         </LinearLayout>
-
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
 
 
 </LinearLayout>

@@ -32,6 +32,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var serviceIntentTimer: Intent
     private lateinit var serviceIntentEndTime: Intent
+    private lateinit var timerRunning: Intent
     private var progressBar: ProgressBar? = null
     private var currentTime:Double = 0.0
     private var timeStop:Int = 0
@@ -42,6 +43,9 @@ class MainActivity : AppCompatActivity() {
     private var numbersMap = mutableMapOf<Int, Button>()
     private var buttonMapHash = hashMapOf<Int, Button>()
     private var numbersMapHash = hashMapOf<Int, Int>()
+    private var timerActiv = false
+    private var timerHasChangedBefore = false
+
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -53,6 +57,8 @@ class MainActivity : AppCompatActivity() {
         serviceIntentTimer = Intent(applicationContext, AccelerationService::class.java)
         registerReceiver(receivingTime, IntentFilter(AccelerationService.BROADCASTTIME))
         serviceIntentEndTime = Intent(applicationContext, AccelerationService::class.java)
+        timerRunning = Intent(applicationContext, AccelerationService::class.java)
+        registerReceiver(timerStarted, IntentFilter(AccelerationService.TIMER_RUNNING))
 
         title = "Sensor Timer"
 
@@ -238,13 +244,56 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private val timerStarted: BroadcastReceiver = object : BroadcastReceiver()
+    {
+        override fun onReceive(context: Context, intent: Intent) {
+
+            timerActiv = intent.getBooleanExtra(AccelerationService.TIMER_RUNNING, false)
+            if (timerActiv && !timerHasChangedBefore) {
+                timerHasChangedBefore = true
+                val resources = resources
+                val drawable = resources.getDrawable(R.drawable.circular_progress_bar)
+                val progressBar: ProgressBar = findViewById(R.id.progressBar)
+
+                var _timestop = intent.getIntExtra(
+                    AccelerationService.STOPTIME,
+                    0
+                )
+                Log.d("TimerRunning", ((_timestop.toFloat()-1)/_timestop.toFloat()).toLong().toString())
+                progressBar.progress = 0
+                progressBar.secondaryProgress = _timestop.toInt()
+                progressBar.max = _timestop.toInt()*30
+                progressBar.progressDrawable = drawable
+
+                Thread {
+                    while (status < _timestop.toInt()*30) {
+                        status += 1
+                        handler.post {
+                            progressBar.progress = status.toInt()
+
+                        }
+                        try {
+                            Thread.sleep((1000/30*(_timestop.toFloat()-1)/_timestop.toFloat()).toLong())
+                        } catch (e: InterruptedException) {
+                            e.printStackTrace()
+                        }
+                    }
+                    timerHasChangedBefore = false
+                    progressBar.progress = 0
+                    status = 0
+                }.start()
+            }
+        }
+
+    }
+
     private val receivingTime: BroadcastReceiver = object : BroadcastReceiver()
     {
         override fun onReceive(context: Context, intent: Intent)
         {
-            val resources = resources
+            /*val resources = resources
             val drawable = resources.getDrawable(R.drawable.circular_progress_bar)
-            val progressBar: ProgressBar = findViewById(R.id.progressBar)
+            val progressBar: ProgressBar = findViewById(R.id.progressBar)*/
             currentTime =intent.getDoubleExtra(
                 AccelerationService.BROADCASTTIME,
                 0.0
@@ -270,13 +319,32 @@ class MainActivity : AppCompatActivity() {
             }
 
             Log.d("TimeStop", lastKey.toString())
-            progressBar.progress = 0
+            /*progressBar.progress = 0
             progressBar.secondaryProgress = timeStop.toInt()
-            progressBar.max = timeStop.toInt()
-            progressBar.progressDrawable = drawable
+            progressBar.max = timeStop.toInt()*30
+            progressBar.progressDrawable = drawable*/
 
             binding.timeTV.text = getTimeStringFromDouble(currentTime)
-            progressBar.progress = currentTime.toInt()
+
+
+            //Smoothening Progressbar
+            /*Thread {
+                while ((status/30 + currentTime) < currentTime + 1) {
+                    status += 1
+                    handler.post {
+                        progressBar.progress = status.toInt() + (currentTime*30).toInt()
+
+                    }
+                    try {
+                        Thread.sleep(1000/30)
+                    }
+                    catch (e: InterruptedException) {
+                        e.printStackTrace()
+                    }
+                }
+            }.start()
+            progressBar.progress = currentTime.toInt()*30*/
+            //status = 0
             if (currentTime.toInt() == timeStop){
                 buttonMapHash.get(currentKey)?.background = roundedCornersDrawable(
                     2.dpToPixels(applicationContext), // border width in pixels
