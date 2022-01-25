@@ -25,6 +25,7 @@ import android.widget.*
 import androidx.core.content.ContextCompat
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.Serializable
+import kotlin.math.roundToLong
 
 
 class MainActivity : AppCompatActivity() {
@@ -273,7 +274,7 @@ class MainActivity : AppCompatActivity() {
 
                         }
                         try {
-                            Thread.sleep((1000/30*(_timestop.toFloat()-1)/_timestop.toFloat()).toLong())
+                            Thread.sleep((1000/30*(_timestop.toFloat()-1)/_timestop.toFloat()).roundToLong())
                         } catch (e: InterruptedException) {
                             e.printStackTrace()
                         }
@@ -348,9 +349,9 @@ class MainActivity : AppCompatActivity() {
             if (currentTime.toInt() == timeStop){
                 buttonMapHash.get(currentKey)?.background = roundedCornersDrawable(
                     2.dpToPixels(applicationContext), // border width in pixels
-                    ContextCompat.getColor(context, R.color.colorPrimaryDark), // border color
+                    ContextCompat.getColor(context, R.color.beige), // border color
                     10.dpToPixels(applicationContext).toFloat(), // corners radius
-                    ContextCompat.getColor(context, R.color.colorPrimaryDark)
+                    ContextCompat.getColor(context, R.color.beige)
                 )
                 Log.d("ColorChange", "Color should be different")
 
